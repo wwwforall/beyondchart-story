@@ -1,5 +1,5 @@
 // BeyondChart — 올라가는 차트의 구조 (공개판)
-// 원본: desktop-chart-widget의 chart-intro.js(buildStory 계산) + chart-story-charts.js(행 차트).
+// **손으로 고치지 말 것** — desktop-chart-widget의 scripts/publish_intro_cases.py가 앱 코드에서 만든다.
 // 공개판은 서버가 없다 — 데이터(data/cases.json)는 GitHub Actions가 매일 갱신한다(scripts/update_cases.py).
 (function () {
     'use strict';
@@ -73,15 +73,17 @@
         // RSI 다이버전스 — structure.py 와 같은 규칙.
         //   강세: 앵커 전 120일을 반으로 갈라 각 저점을 비교, 가격은 더 낮은데 RSI는 3 이상 높다
         //   약세: 앵커 뒤 120일 고점과 그 전 10~60일 사이 고점 비교, 가격은 더 높은데 RSI는 3 이상 낮다
-        const bi = idx(raw.breakDay);
+        // 앵커가 없는 행(지수 같은 시장 맥락, `context`)은 n — 아래 다이버전스·표시가 전부 건너뛴다.
+        // idx('')로 두면 모든 날짜가 ''보다 커서 **첫 봉이 앵커**가 된다
+        const bi = raw.breakDay ? idx(raw.breakDay) : n;
         const fullB = bi + lead, H = full.h, Lo = full.l, R = rsiWilder(full.c, 14);
         let bullDiv = null, bearDiv = null;
-        if (fullB - 120 >= 0) {
+        if (raw.breakDay && fullB - 120 >= 0) {
             const i1 = argExt(Lo, fullB - 120, fullB - 60, false), i2 = argExt(Lo, fullB - 60, fullB, false);
             bullDiv = { yes: Lo[i2] < Lo[i1] && R[i2] > R[i1] + 3, a: i1 - lead, b: i2 - lead };
         }
         const pk = argExt(H, fullB + 1, Math.min(full.c.length, fullB + 121), true);
-        if (pk - 60 >= 0) {
+        if (raw.breakDay && pk - 60 >= 0) {
             const j = argExt(H, pk - 60, pk - 10, true);
             bearDiv = { yes: H[pk] > H[j] && R[pk] < R[j] - 3, a: j - lead, b: pk - lead };
         }
@@ -94,7 +96,7 @@
             raw, n, ma, ma50, ma200, bb, rsi, bullDiv, bearDiv, phases, events, vmax,
             breakIdx: bi, threshold: raw.threshold, loI, hiI, winA, winB,
             // 임계 대비 로그 수익률의 범위 — 세로 스케일(배수당 px)이 모든 행에서 같다
-            lnLo: Math.log(Math.min(...raw.l) / raw.threshold), lnHi: Math.log(Math.max(...raw.h) / raw.threshold),
+            lnLo: Math.log(Math.min(...raw.l) / (raw.threshold || raw.c[0])), lnHi: Math.log(Math.max(...raw.h) / (raw.threshold || raw.c[0])),
         };
     }
 
@@ -242,7 +244,10 @@
             upColor: col.bull, downColor: col.bear, borderVisible: false, wickUpColor: col.bull, wickDownColor: col.bear,
             priceLineVisible: false,
         });
-        candle.createPriceLine({ price: s.threshold, color: col.warn, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: '임계' });
+        // 앵커가 없는 행(지수 = 시장 맥락)은 임계도 없다
+        if (Number.isFinite(s.threshold)) {
+            candle.createPriceLine({ price: s.threshold, color: col.warn, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: '임계' });
+        }
         const markers = LC.createSeriesMarkers(candle, []);
         // RSI(14) — 아래 페인
         const rsi = chart.addSeries(LC.LineSeries, { ...opt, color: col.accent, lineWidth: 1,
@@ -330,7 +335,6 @@
         };
     };
 
-
     // ── 페이지 ─────────────────────────────────────────────────────────────
     const rowsEl = document.getElementById('story-rows');
     const nav = document.getElementById('story-nav');
@@ -355,7 +359,8 @@
             chip.appendChild(btn);
             nav.appendChild(chip);
         });
-        if (stamp) stamp.textContent = `데이터 기준 ${last} · 사례 ${stories.length}편`;
+        const ctx = stories.filter(s => s.raw.context).length;
+        if (stamp) stamp.textContent = `데이터 기준 ${last} · 시장 지수 ${ctx} · 사례 ${stories.length - ctx}편`;
     }).catch(e => {
         rowsEl.innerHTML = `<p class="story-err">데이터를 못 불러왔습니다: ${String(e)}</p>`;
     });

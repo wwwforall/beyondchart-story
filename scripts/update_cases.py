@@ -19,7 +19,8 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CASES = os.path.join(ROOT, 'data', 'cases.json')
 
-# 사례 id → Yahoo 심볼. 사례를 늘리면 여기도 한 줄
+# 사례 id → Yahoo 심볼. **사례에 `yahoo` 칸이 있으면 그게 우선**이다 — 앱의 add_intro_case.py가 적어 주므로
+# 새 사례는 여기를 안 고쳐도 된다. 이 표는 그 칸이 생기기 전에 들어온 사례들 몫이다
 YAHOO = {
     'saerom1999': '035610.KQ', 'hhi2003': '009540.KS', 'celltrion2015': '068270.KS',
     'shinpoong2020': '019170.KS', 'seegene2020': '096530.KQ', 'hmm2020': '011200.KS',
@@ -76,7 +77,7 @@ def main():
     cases = json.load(open(CASES, encoding='utf-8'))
     changed = False
     for case in cases:
-        sym = YAHOO.get(case['id'])
+        sym = case.get('yahoo') or YAHOO.get(case['id'])
         if not sym:
             print(f"{case['id']}: Yahoo 심볼 없음 — 건너뜀")
             continue
