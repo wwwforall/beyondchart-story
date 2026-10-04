@@ -1,0 +1,30 @@
+# 매일 시세를 이어 붙여 커밋한다 — 커밋이 생기면 GitHub Pages가 알아서 다시 배포한다.
+# 22:30 UTC = 한국 07:30, 미국장 마감(20:00~21:00 UTC) 뒤. 비트코인 때문에 주말에도 돈다.
+name: update data
+
+on:
+  schedule:
+    - cron: '30 22 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install yfinance
+      - run: python scripts/update_cases.py
+      - name: commit if changed
+        run: |
+          if git diff --quiet data/cases.json; then echo "no change"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/cases.json
+          git commit -m "데이터 갱신 $(date -u +%Y-%m-%d)"
+          git push

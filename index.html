@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>올라가는 차트의 구조 — BeyondChart</title>
+<meta name="description" content="역사적 텐배거들의 차트 — 시작·절정·소멸. 사례마다 드래그·휠 확대가 되는 차트.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="story-top">
+  <div class="story-head">
+    <span class="story-title">올라가는 차트의 구조 — 역사적 텐배거들</span>
+    <span class="story-sub">차트 위 휠 = 확대·축소 · 드래그 = 이동 · 페이지는 차트 바깥(좌우 여백·행 사이)에서 휠 · 로그 가격축 · 각 행의 <b>창</b>/<b>전체</b>/<b>현재가</b></span>
+    <span class="story-legend"><i style="background:var(--ma-20)"></i>20일 <i style="background:var(--ma-50)"></i>50일 <i style="background:var(--ma-200)"></i>200일 <i style="background:var(--text-4)"></i>볼린저(20,2σ) <i style="background:var(--accent)"></i>RSI(14) <i style="background:var(--warn)"></i>앵커·임계 <span id="story-stamp" class="story-stamp"></span></span>
+  </div>
+  <nav id="story-nav" aria-label="사례 바로가기"></nav>
+</header>
+<main id="story-rows"></main>
+<footer class="story-foot">
+  <p><b>읽는 법</b> — <b>앵커</b>: 처음으로 직전 120일 고가를 종가로 넘고, 그 뒤 120일 안에 ×1.5에 닿은 날. <b>임계</b>: 그 120일 고가.
+  <b>창</b>: 그 종목의 내러티브가 시작→절정→소멸한 구간(개인 정리). 국면 띠·이벤트는 아카이브가 있는 사례에만 있다.</p>
+  <p>개인이 정리한 학습용 자료이며 투자 권유가 아닙니다. 시세는 Yahoo Finance 일봉(전날 종가 기준, 하루 늦을 수 있음)이고 과거 구간은 수정주가 기준으로 맞췄습니다.
+  차트: <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a></p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@5.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="story.js"></script>
+</body>
+</html>
